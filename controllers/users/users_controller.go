@@ -1,8 +1,8 @@
 package users
 
 import (
-	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/shchaslyvyi/bookstore_users-api/domains/services"
@@ -12,13 +12,23 @@ import (
 
 // GetUser is the function to Get the user entity
 func GetUser(c *gin.Context) {
-	c.String(http.StatusNotImplemented, "Not implemented exception")
+	userID, userErr := strconv.ParseInt(c.Param("user_id"), 10, 64)
+	if userErr != nil {
+		err := errors.NewBadRequestError("Invalid user ID - should be a number")
+		c.JSON(err.Status, err)
+		return
+	}
+	user, getErr := services.GetUser(userID)
+	if getErr != nil {
+		c.JSON(getErr.Status, getErr)
+		return
+	}
+	c.JSON(http.StatusOK, user)
 }
 
 // CreateUser is a function to Create a user entity
 func CreateUser(c *gin.Context) {
 	var user users.User
-	fmt.Println(user)
 	if err := c.ShouldBindJSON(&user); err != nil {
 		restErr := errors.NewBadRequestError("Invalid JSON body")
 		c.JSON(restErr.Status, restErr)
@@ -30,5 +40,4 @@ func CreateUser(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusCreated, result)
-
 }
