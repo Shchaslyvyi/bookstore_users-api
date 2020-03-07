@@ -3,6 +3,8 @@ package users
 import (
 	"fmt"
 
+	"github.com/shchaslyvyi/bookstore_users-api/datasources/mysql/users_db"
+	"github.com/shchaslyvyi/bookstore_users-api/utils/date_utils"
 	"github.com/shchaslyvyi/bookstore_users-api/utils/errors"
 )
 
@@ -12,6 +14,9 @@ var (
 
 // Get is a persistance leyer getUser function
 func (user *User) Get() *errors.RestErr {
+	if err := users_db.Client.Ping(); err != nil {
+		panic(err)
+	}
 	result := userDB[user.ID]
 	if result == nil {
 		return errors.NewNotFoundError(fmt.Sprintf("user %d not found", user.ID))
@@ -33,6 +38,9 @@ func (user *User) Save() *errors.RestErr {
 		}
 		return errors.NewBadRequestError(fmt.Sprintf("user %s already exists", user.FirstName))
 	}
+
+	user.DateCreated = date_utils.GetNowString()
+
 	userDB[user.ID] = user
 	return nil
 }
