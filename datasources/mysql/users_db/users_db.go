@@ -16,7 +16,7 @@ var (
 )
 
 func init() {
-
+	// Load the Env Variables.
 	godotenv.Load()
 
 	dataSourceName := fmt.Sprintf("%s:%s@/%s",

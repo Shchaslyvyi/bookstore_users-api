@@ -6,7 +6,7 @@ import (
 	"github.com/shchaslyvyi/bookstore_users-api/utils/errors"
 )
 
-// User sctruct describes a user object's properties
+// User sctruct describes a user object's properties in Data Transfer Object.
 type User struct {
 	ID          int64  `json:"id"`
 	FirstName   string `json:"first_name"`
