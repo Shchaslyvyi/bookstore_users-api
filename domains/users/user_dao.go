@@ -12,26 +12,27 @@ import (
 const (
 	queryInsertUser  = "INSERT INTO users(first_name, last_name, email, date_created) VALUES(?, ?, ?, ?);"
 	indexUniqueEmail = "email_UNIQUE"
-)
-
-var (
-	userDB = make(map[int64]*User)
+	errorNoRows      = "no rows in result set"
+	queryGetUser     = "SELECT id, first_name, last_name, email, date_created FROM users WHERE id=?;"
 )
 
 // Get is a persistance leyer getUser function in Data Access Object.
 func (user *User) Get() *errors.RestErr {
-	if err := users_db.Client.Ping(); err != nil {
-		panic(err)
+	stmt, err := users_db.Client.Prepare(queryGetUser)
+	if err != nil {
+		return errors.NewInternalServerError(fmt.Sprintf("Internal server error happened: %s.", err.Error()))
 	}
-	result := userDB[user.ID]
-	if result == nil {
-		return errors.NewNotFoundError(fmt.Sprintf("User %d not found.", user.ID))
+	defer stmt.Close()
+
+	result := stmt.QueryRow(user.ID)
+	if err := result.Scan(&user.ID, &user.FirstName, &user.LastName, &user.Email, &user.DateCreated); err != nil {
+		if strings.Contains(err.Error(), errorNoRows) {
+			return errors.NewNotFoundError(
+				fmt.Sprintf("Error, user not found %d", user.ID))
+		}
+		return errors.NewInternalServerError(
+			fmt.Sprintf("Error while trying to get from the DB the user %d, %s", user.ID, err.Error()))
 	}
-	user.ID = result.ID
-	user.FirstName = result.FirstName
-	user.LastName = result.LastName
-	user.Email = result.Email
-	user.DateCreated = result.DateCreated
 	return nil
 }
 
