@@ -13,6 +13,7 @@ const (
 	queryInsertUser = "INSERT INTO users(first_name, last_name, email, date_created) VALUES(?, ?, ?, ?);"
 	errorNoRows     = "no rows in result set"
 	queryGetUser    = "SELECT id, first_name, last_name, email, date_created FROM users WHERE id=?;"
+	queryUpdateUser = "UPDATE users SET first_name=?, last_name=?, email=? WHERE id=?;"
 )
 
 // Get is a persistance leyer getUser function in Data Access Object.
@@ -51,5 +52,20 @@ func (user *User) Save() *errors.RestErr {
 	}
 
 	user.ID = userID
+	return nil
+}
+
+// Update is a persistance leyer updateUser function in Data Access Object
+func (user *User) Update() *errors.RestErr {
+	stmt, err := users_db.Client.Prepare(queryUpdateUser)
+	if err != nil {
+		return errors.NewInternalServerError(fmt.Sprintf(err.Error()))
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(user.FirstName, user.LastName, user.Email, user.ID)
+	if err != nil {
+		return mysql_utils.ParseError(err)
+	}
 	return nil
 }
