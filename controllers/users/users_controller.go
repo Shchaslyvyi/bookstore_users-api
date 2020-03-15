@@ -10,12 +10,20 @@ import (
 	"github.com/shchaslyvyi/bookstore_users-api/utils/errors"
 )
 
-// GetUser is the function to Get the user entity
-func GetUser(c *gin.Context) {
-	userID, userErr := strconv.ParseInt(c.Param("user_id"), 10, 64)
+// getUserID is the function to Get the user entity
+func getUserID(paramUserID string) (int64, *errors.RestErr) {
+	userID, userErr := strconv.ParseInt(paramUserID, 10, 64)
 	if userErr != nil {
-		err := errors.NewBadRequestError("Invalid user ID - should be a number")
-		c.JSON(err.Status, err)
+		return 0, errors.NewBadRequestError("Invalid user ID - should be a number")
+	}
+	return userID, nil
+}
+
+// Get is the function to Get the user entity
+func Get(c *gin.Context) {
+	userID, errID := getUserID(c.Param("user_id"))
+	if errID != nil {
+		c.JSON(errID.Status, errID)
 		return
 	}
 	user, getErr := services.GetUser(userID)
@@ -26,8 +34,8 @@ func GetUser(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
-// CreateUser is a function to Create a user entity
-func CreateUser(c *gin.Context) {
+// Create is a function to Create a user entity
+func Create(c *gin.Context) {
 	var user users.User
 	if err := c.ShouldBindJSON(&user); err != nil {
 		restErr := errors.NewBadRequestError("Invalid JSON body")
@@ -42,12 +50,11 @@ func CreateUser(c *gin.Context) {
 	c.JSON(http.StatusCreated, result)
 }
 
-// UpdateUser is the function to Update the existing user in the DB
-func UpdateUser(c *gin.Context) {
-	userID, userErr := strconv.ParseInt(c.Param("user_id"), 10, 64)
-	if userErr != nil {
-		err := errors.NewBadRequestError("Invalid user ID - should be a number")
-		c.JSON(err.Status, err)
+// Update is the function to Update the existing user in the DB
+func Update(c *gin.Context) {
+	userID, errID := getUserID(c.Param("user_id"))
+	if errID != nil {
+		c.JSON(errID.Status, errID)
 		return
 	}
 	var user users.User
@@ -64,4 +71,18 @@ func UpdateUser(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, result)
+}
+
+// Delete is the function to Delete the existing user from the DB
+func Delete(c *gin.Context) {
+	userID, errID := getUserID(c.Param("user_id"))
+	if errID != nil {
+		c.JSON(errID.Status, errID)
+		return
+	}
+	if err := services.DeleteUser(userID); err != nil {
+		c.JSON(err.Status, err)
+		return
+	}
+	c.JSON(http.StatusOK, map[string]string{"status": "deleted"})
 }

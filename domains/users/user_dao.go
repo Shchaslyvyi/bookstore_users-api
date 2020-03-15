@@ -14,9 +14,10 @@ const (
 	errorNoRows     = "no rows in result set"
 	queryGetUser    = "SELECT id, first_name, last_name, email, date_created FROM users WHERE id=?;"
 	queryUpdateUser = "UPDATE users SET first_name=?, last_name=?, email=? WHERE id=?;"
+	queryDeleteUser = "DELETE from users WHERE id=?;"
 )
 
-// Get is a persistance leyer getUser function in Data Access Object.
+// Get is a persistance leyer of GetUser function in Data Access Object.
 func (user *User) Get() *errors.RestErr {
 	stmt, err := users_db.Client.Prepare(queryGetUser)
 	if err != nil {
@@ -31,7 +32,7 @@ func (user *User) Get() *errors.RestErr {
 	return nil
 }
 
-// Save is a persistance leyer getUser function in Data Access Object
+// Save is a persistance leyer of SaveUser function in Data Access Object
 func (user *User) Save() *errors.RestErr {
 	stmt, err := users_db.Client.Prepare(queryInsertUser)
 	if err != nil {
@@ -55,7 +56,7 @@ func (user *User) Save() *errors.RestErr {
 	return nil
 }
 
-// Update is a persistance leyer updateUser function in Data Access Object
+// Update is a persistance leyer of UpdateUser function in Data Access Object
 func (user *User) Update() *errors.RestErr {
 	stmt, err := users_db.Client.Prepare(queryUpdateUser)
 	if err != nil {
@@ -65,6 +66,20 @@ func (user *User) Update() *errors.RestErr {
 
 	_, err = stmt.Exec(user.FirstName, user.LastName, user.Email, user.ID)
 	if err != nil {
+		return mysql_utils.ParseError(err)
+	}
+	return nil
+}
+
+// Delete is a persistance leyer of DeleteUser function in Data Access Object
+func (user *User) Delete() *errors.RestErr {
+	stmt, err := users_db.Client.Prepare(queryDeleteUser)
+	if err != nil {
+		return errors.NewInternalServerError(fmt.Sprintf(err.Error()))
+	}
+	defer stmt.Close()
+
+	if _, err = stmt.Exec(user.ID); err != nil {
 		return mysql_utils.ParseError(err)
 	}
 	return nil
