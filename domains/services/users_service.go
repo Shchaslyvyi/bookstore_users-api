@@ -2,6 +2,7 @@ package services
 
 import (
 	"github.com/shchaslyvyi/bookstore_users-api/domains/users"
+	"github.com/shchaslyvyi/bookstore_users-api/utils/date_utils"
 	"github.com/shchaslyvyi/bookstore_users-api/utils/errors"
 )
 
@@ -10,6 +11,10 @@ func CreateUser(user users.User) (*users.User, *errors.RestErr) {
 	if err := user.Validate(); err != nil {
 		return nil, err
 	}
+
+	user.Status = users.StatusActive
+	user.DateCreated = date_utils.GetNowDBFormat()
+
 	if err := user.Save(); err != nil {
 		return nil, err
 	}
@@ -59,4 +64,10 @@ func UpdateUser(isPartial bool, user users.User) (*users.User, *errors.RestErr) 
 func DeleteUser(userID int64) *errors.RestErr {
 	user := &users.User{ID: userID}
 	return user.Delete()
+}
+
+// Search is a function that implements the business logic of finding users according to status
+func Search(status string) ([]users.User, *errors.RestErr) {
+	dao := &users.User{}
+	return dao.Search(status)
 }
