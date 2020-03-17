@@ -22,6 +22,8 @@ type User struct {
 	Password    string `json:"password"`
 }
 
+type Users []User
+
 // Validate function validates the user data entries
 func (user *User) Validate() *errors.RestErr {
 	user.FirstName = strings.TrimSpace(user.FirstName)
