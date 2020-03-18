@@ -7,8 +7,32 @@ import (
 	"github.com/shchaslyvyi/bookstore_users-api/utils/errors"
 )
 
-// CreateUser is a function that implements the business logic of the user creation
-func CreateUser(user users.User) (*users.User, *errors.RestErr) {
+var (
+	UsersService usersServiceInterface = &usersService{}
+)
+
+type usersService struct {
+}
+
+type usersServiceInterface interface {
+	GetUser(int64) (*users.User, *errors.RestErr)
+	CreateUser(users.User) (*users.User, *errors.RestErr)
+	UpdateUser(bool, users.User) (*users.User, *errors.RestErr)
+	DeleteUser(int64) *errors.RestErr
+	SearchUser(string) (users.Users, *errors.RestErr)
+}
+
+// GetUser is a method that implements the business logic of the user fetch
+func (s *usersService) GetUser(userID int64) (*users.User, *errors.RestErr) {
+	result := &users.User{ID: userID}
+	if err := result.Get(); err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+// CreateUser is a method that implements the business logic of the user creation
+func (s *usersService) CreateUser(user users.User) (*users.User, *errors.RestErr) {
 	if err := user.Validate(); err != nil {
 		return nil, err
 	}
@@ -23,17 +47,8 @@ func CreateUser(user users.User) (*users.User, *errors.RestErr) {
 	return &user, nil
 }
 
-// GetUser is a function that implements the business logic of the user fetch
-func GetUser(userID int64) (*users.User, *errors.RestErr) {
-	result := &users.User{ID: userID}
-	if err := result.Get(); err != nil {
-		return nil, err
-	}
-	return result, nil
-}
-
-// UpdateUser is a function that implements the business logic of the existing user update in the DB
-func UpdateUser(isPartial bool, user users.User) (*users.User, *errors.RestErr) {
+// UpdateUser is a method that implements the business logic of the existing user update in the DB
+func (s *usersService) UpdateUser(isPartial bool, user users.User) (*users.User, *errors.RestErr) {
 	current, err := GetUser(user.ID)
 	if err != nil {
 		return nil, err
@@ -62,14 +77,14 @@ func UpdateUser(isPartial bool, user users.User) (*users.User, *errors.RestErr) 
 	return current, nil
 }
 
-// DeleteUser is a function that implements the business logic of the user delete
-func DeleteUser(userID int64) *errors.RestErr {
+// DeleteUser is a method that implements the business logic of the user delete
+func (s *usersService) DeleteUser(userID int64) *errors.RestErr {
 	user := &users.User{ID: userID}
 	return user.Delete()
 }
 
-// Search is a function that implements the business logic of finding users according to status
-func Search(status string) (users.Users, *errors.RestErr) {
+// SearchUser is a method that implements the business logic of finding users according to status
+func (s *usersService) SearchUser(status string) (users.Users, *errors.RestErr) {
 	dao := &users.User{}
 	return dao.Search(status)
 }
