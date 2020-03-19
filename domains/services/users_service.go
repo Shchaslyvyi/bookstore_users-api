@@ -7,6 +7,7 @@ import (
 	"github.com/shchaslyvyi/bookstore_users-api/utils/errors"
 )
 
+// UsersService is an interface that implements the user_service business logic functions
 var (
 	UsersService usersServiceInterface = &usersService{}
 )
@@ -49,11 +50,8 @@ func (s *usersService) CreateUser(user users.User) (*users.User, *errors.RestErr
 
 // UpdateUser is a method that implements the business logic of the existing user update in the DB
 func (s *usersService) UpdateUser(isPartial bool, user users.User) (*users.User, *errors.RestErr) {
-	current, err := GetUser(user.ID)
-	if err != nil {
-		return nil, err
-	}
-	if err := user.Validate(); err != nil {
+	current := &users.User{ID: user.ID}
+	if err := current.Get(); err != nil {
 		return nil, err
 	}
 	if isPartial {
