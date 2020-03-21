@@ -22,6 +22,7 @@ type User struct {
 	Password    string `json:"password"`
 }
 
+// Users is a slice of users
 type Users []User
 
 // Validate function validates the user data entries

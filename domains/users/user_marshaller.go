@@ -37,8 +37,8 @@ func (user *User) Marshall(isPublic bool) interface{} {
 			Status:      user.Status,
 		}
 	}
-	userJson, _ := json.Marshal(user)
+	userJSON, _ := json.Marshal(user)
 	var privateUser PrivateUser
-	json.Unmarshal(userJson, &privateUser)
+	json.Unmarshal(userJSON, &privateUser)
 	return privateUser
 }
