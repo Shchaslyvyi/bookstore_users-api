@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/shchaslyvyi/bookstore_oauth-go/oauth"
 	"github.com/shchaslyvyi/bookstore_users-api/domains/services"
 	"github.com/shchaslyvyi/bookstore_users-api/domains/users"
 	"github.com/shchaslyvyi/bookstore_users-api/utils/errors"
@@ -21,17 +22,37 @@ func getUserID(paramUserID string) (int64, *errors.RestErr) {
 
 // Get is the function to Get the user entity
 func Get(c *gin.Context) {
+	if err := oauth.AuthenticateRequest(c.Request); err != nil {
+		c.JSON(err.Status, err)
+		return
+	}
+
+	//if callerID := oauth.GetCallerID(c.Request); callerID == 0 {
+	//	err := errors.RestErr{
+	//		Status:  http.StatusUnauthorized,
+	//		Message: "Resource not available.",
+	//	}
+	//	c.JSON(err.Status, err)
+	//	return
+	//}
+
 	userID, errID := getUserID(c.Param("user_id"))
 	if errID != nil {
 		c.JSON(errID.Status, errID)
 		return
 	}
+
 	user, getErr := services.UsersService.GetUser(userID)
 	if getErr != nil {
 		c.JSON(getErr.Status, getErr)
 		return
 	}
-	c.JSON(http.StatusOK, user.Marshall(c.GetHeader("X-Public") == "true"))
+
+	if oauth.GetCallerID(c.Request) == user.ID {
+		c.JSON(http.StatusOK, user.Marshall(false))
+		return
+	}
+	c.JSON(http.StatusOK, user.Marshall(oauth.IsPublic(c.Request)))
 }
 
 // Create is a function to Create a user entity
