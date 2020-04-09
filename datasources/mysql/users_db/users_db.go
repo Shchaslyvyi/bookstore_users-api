@@ -6,8 +6,8 @@ import (
 	"log"
 	"os"
 
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/joho/godotenv"
-	_ "github.com/mysql"
 )
 
 // UserDB - defines used for Users DB type as sql.
