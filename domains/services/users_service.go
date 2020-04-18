@@ -4,7 +4,7 @@ import (
 	"github.com/shchaslyvyi/bookstore_users-api/domains/users"
 	"github.com/shchaslyvyi/bookstore_users-api/utils/crypto_utils"
 	"github.com/shchaslyvyi/bookstore_users-api/utils/date_utils"
-	"github.com/shchaslyvyi/bookstore_users-api/utils/errors"
+	"github.com/shchaslyvyi/bookstore_utils-go/rest_errors"
 )
 
 // UsersService is an interface that implements the user_service business logic functions
@@ -16,16 +16,16 @@ type usersService struct {
 }
 
 type usersServiceInterface interface {
-	GetUser(int64) (*users.User, *errors.RestErr)
-	CreateUser(users.User) (*users.User, *errors.RestErr)
-	UpdateUser(bool, users.User) (*users.User, *errors.RestErr)
-	DeleteUser(int64) *errors.RestErr
-	SearchUser(string) (users.Users, *errors.RestErr)
-	LoginUser(users.LoginRequest) (*users.User, *errors.RestErr)
+	GetUser(int64) (*users.User, *rest_errors.RestErr)
+	CreateUser(users.User) (*users.User, *rest_errors.RestErr)
+	UpdateUser(bool, users.User) (*users.User, *rest_errors.RestErr)
+	DeleteUser(int64) *rest_errors.RestErr
+	SearchUser(string) (users.Users, *rest_errors.RestErr)
+	LoginUser(users.LoginRequest) (*users.User, *rest_errors.RestErr)
 }
 
 // GetUser is a method that implements the business logic of the user fetch
-func (s *usersService) GetUser(userID int64) (*users.User, *errors.RestErr) {
+func (s *usersService) GetUser(userID int64) (*users.User, *rest_errors.RestErr) {
 	result := &users.User{ID: userID}
 	if err := result.Get(); err != nil {
 		return nil, err
@@ -34,7 +34,7 @@ func (s *usersService) GetUser(userID int64) (*users.User, *errors.RestErr) {
 }
 
 // CreateUser is a method that implements the business logic of the user creation
-func (s *usersService) CreateUser(user users.User) (*users.User, *errors.RestErr) {
+func (s *usersService) CreateUser(user users.User) (*users.User, *rest_errors.RestErr) {
 	if err := user.Validate(); err != nil {
 		return nil, err
 	}
@@ -50,7 +50,7 @@ func (s *usersService) CreateUser(user users.User) (*users.User, *errors.RestErr
 }
 
 // UpdateUser is a method that implements the business logic of the existing user update in the DB
-func (s *usersService) UpdateUser(isPartial bool, user users.User) (*users.User, *errors.RestErr) {
+func (s *usersService) UpdateUser(isPartial bool, user users.User) (*users.User, *rest_errors.RestErr) {
 	current := &users.User{ID: user.ID}
 	if err := current.Get(); err != nil {
 		return nil, err
@@ -77,19 +77,19 @@ func (s *usersService) UpdateUser(isPartial bool, user users.User) (*users.User,
 }
 
 // DeleteUser is a method that implements the business logic of the user delete
-func (s *usersService) DeleteUser(userID int64) *errors.RestErr {
+func (s *usersService) DeleteUser(userID int64) *rest_errors.RestErr {
 	user := &users.User{ID: userID}
 	return user.Delete()
 }
 
 // SearchUser is a method that implements the business logic of finding users according to status
-func (s *usersService) SearchUser(status string) (users.Users, *errors.RestErr) {
+func (s *usersService) SearchUser(status string) (users.Users, *rest_errors.RestErr) {
 	dao := &users.User{}
 	return dao.Search(status)
 }
 
 // LoginUser is a method that implements the business logic of users login
-func (s *usersService) LoginUser(request users.LoginRequest) (*users.User, *errors.RestErr) {
+func (s *usersService) LoginUser(request users.LoginRequest) (*users.User, *rest_errors.RestErr) {
 	dao := &users.User{
 		Email:    request.Email,
 		Password: crypto_utils.GetMd5(request.Password),

@@ -3,7 +3,7 @@ package users
 import (
 	"strings"
 
-	"github.com/shchaslyvyi/bookstore_users-api/utils/errors"
+	"github.com/shchaslyvyi/bookstore_utils-go/rest_errors"
 )
 
 // Status definitions
@@ -26,18 +26,18 @@ type User struct {
 type Users []User
 
 // Validate function validates the user data entries
-func (user *User) Validate() *errors.RestErr {
+func (user *User) Validate() *rest_errors.RestErr {
 	user.FirstName = strings.TrimSpace(user.FirstName)
 	user.LastName = strings.TrimSpace(user.LastName)
 
 	user.Email = strings.TrimSpace(strings.ToLower(user.Email))
 	if user.Email == "" {
-		return errors.NewBadRequestError("Invalind user email.")
+		return rest_errors.NewBadRequestError("Invalind user email.")
 	}
 
 	user.Password = strings.TrimSpace(user.Password)
 	if user.Password == "" {
-		return errors.NewBadRequestError("Invalid password.")
+		return rest_errors.NewBadRequestError("Invalid password.")
 	}
 	return nil
 }

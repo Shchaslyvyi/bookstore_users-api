@@ -6,16 +6,17 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/shchaslyvyi/bookstore_oauth-go/oauth"
+	"github.com/shchaslyvyi/bookstore_oauth-go/oauth/errors"
 	"github.com/shchaslyvyi/bookstore_users-api/domains/services"
 	"github.com/shchaslyvyi/bookstore_users-api/domains/users"
-	"github.com/shchaslyvyi/bookstore_users-api/utils/errors"
+	"github.com/shchaslyvyi/bookstore_utils-go/rest_errors"
 )
 
 // getUserID is the function to Get the user entity
-func getUserID(paramUserID string) (int64, *errors.RestErr) {
+func getUserID(paramUserID string) (int64, *rest_errors.RestErr) {
 	userID, userErr := strconv.ParseInt(paramUserID, 10, 64)
 	if userErr != nil {
-		return 0, errors.NewBadRequestError("Invalid user ID - should be a number")
+		return 0, rest_errors.NewBadRequestError("Invalid user ID - should be a number")
 	}
 	return userID, nil
 }
@@ -26,15 +27,6 @@ func Get(c *gin.Context) {
 		c.JSON(err.Status, err)
 		return
 	}
-
-	//if callerID := oauth.GetCallerID(c.Request); callerID == 0 {
-	//	err := errors.RestErr{
-	//		Status:  http.StatusUnauthorized,
-	//		Message: "Resource not available.",
-	//	}
-	//	c.JSON(err.Status, err)
-	//	return
-	//}
 
 	userID, errID := getUserID(c.Param("user_id"))
 	if errID != nil {
